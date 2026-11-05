@@ -6,6 +6,9 @@
 /** @type {string} Web a la que se redirige la ventana principal. */
 const URL_ILERNA = "https://www.ilerna.es/";
 
+/** @type {number} Tiempo hasta el cierre automático, en milisegundos (5 s). */
+const TIEMPO_AUTODESTRUCCION = 5000;
+
 // === 1. DETECCIÓN DEL SISTEMA  ===
 
 /**
@@ -56,10 +59,39 @@ function redirigirSinHistorial() {
     window.opener.location.replace(URL_ILERNA);
 }
 
-// === 3. EVENTOS ===
+// === 3. AUTODESTRUCCIÓN ===
+
+/**
+ * Inicia la cuenta atrás de autodestrucción:
+ * - setInterval() actualiza el mensaje en pantalla cada segundo.
+ * - setTimeout() cierra la ventana al cumplirse los 5 segundos.
+ */
+function iniciarAutodestruccion() {
+    const mensaje = document.getElementById("mensaje-autodestruccion");
+    let segundosRestantes = TIEMPO_AUTODESTRUCCION / 1000;
+
+    // Se desactiva el botón para que no se lancen varias cuentas atrás a la vez.
+    document.getElementById("btn-autodestruccion").disabled = true;
+    mensaje.textContent = `Autodestrucción en ${segundosRestantes}...`;
+
+    // Cada segundo, resta uno y actualiza el texto. Se guarda su ID para poder pararlo.
+    const idIntervalo = setInterval(() => {
+        segundosRestantes--;
+        mensaje.textContent = `Autodestrucción en ${segundosRestantes}...`;
+    }, 1000);
+
+    // Al cumplirse el tiempo, se para el intervalo y se cierra la ventana.
+    setTimeout(() => {
+        clearInterval(idIntervalo);
+        window.close();
+    }, TIEMPO_AUTODESTRUCCION);
+}
+
+// === 4. EVENTOS ===
 
 // Nada más cargarse la ventana, se muestra la bienvenida.
 window.addEventListener("load", mostrarBienvenida);
 
 document.getElementById("btn-con-historial").addEventListener("click", redirigirConHistorial);
 document.getElementById("btn-sin-historial").addEventListener("click", redirigirSinHistorial);
+document.getElementById("btn-autodestruccion").addEventListener("click", iniciarAutodestruccion);
